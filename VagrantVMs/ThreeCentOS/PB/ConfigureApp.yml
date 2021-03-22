@@ -1,0 +1,27 @@
+---
+- hosts: app
+  gather_facts: false
+  become: yes
+
+
+  tasks:
+  - name: Install chrony
+    yum:
+      name: chrony
+      state: present
+
+  - name: Start chronyd with systemd
+    service:
+      name: chronyd
+      state: started
+      enabled: yes
+
+  - name: Yum install python3-pip
+    yum:
+      name: python3-pip
+      state: present
+
+  - name: Install django with python
+    pip:
+      name: django<4
+      state: present

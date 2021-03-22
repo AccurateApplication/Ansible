@@ -1,0 +1,62 @@
+---
+- hosts: db
+  gather_facts: false
+  become: yes
+
+
+  tasks:
+  - name: Install mariadb
+    yum:
+      name: mariadb-server
+      state: present
+
+  - name: Start mariadb with systemd
+    service:
+      name: mariadb
+      state: started
+      enabled: yes
+
+  - name: install firewalld
+    yum:
+      name: firewalld
+      state: present
+
+  - name: Start firewalld with systemd
+    service:
+      name: firewalld
+      state: started
+      enabled: yes
+
+  - name: Configure database zone firewalld
+    firewalld:
+      zone: database
+      state: present
+      permanent: yes
+
+  - name: Add subnet to database zone
+    firewalld:
+      source: 192.168.56.0/24
+      zone: database
+      state: enabled
+      permanent: yes
+
+  - name: add 3306/tcp to zone database
+    firewalld:
+      port: 3306/tcp
+      zone: database
+      state: enabled
+      permanent: yes
+
+  - name: Install MYSQL
+    yum:
+      name: python3-PyMySQL
+      state: present
+
+  - name: Set up MySQL User
+    mysql_user:
+      name: django
+      host: "%"
+      password: "12345" # nice
+      priv: "*.*:ALL"
+      state: present
+

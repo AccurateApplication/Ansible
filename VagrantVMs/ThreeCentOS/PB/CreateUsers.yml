@@ -1,0 +1,19 @@
+---
+- hosts: all
+  gather_facts: false
+  become: yes
+
+
+  tasks:
+  - name: Create admin group
+    group:
+      name: admin
+      state: present
+      # TODO: Add admin group as sudoer group
+
+  - name: Create admin user
+    user:
+      name: George
+      group: admin
+      createhome: yes
+      state: present
