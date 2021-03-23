@@ -1,0 +1,44 @@
+---
+- hosts: all
+  #gather_facts: false
+  become: yes
+
+
+  vars: 
+    node_apps_location: /usr/local/opt/node
+  tasks:
+  - name: Install EPEL
+    yum: name=epel-release state=present
+
+    #  - name: Import remi key
+    #    rpm_key:
+    #      #key: "https://rpms.remirepo.net/RPM-GPG-KEY-remi"
+    #      #key: "https://rpms.remirepo.net/RPM-GPG-KEY-remi2021"
+    #      #key: "https://rpms.remirepo.net/RPM-GPG-KEY-remi"
+    #      state: present
+
+  - name: Install remi repo
+    yum: 
+      # name: "https://rpms.remirepo.net/enterprise/remi-release-8.rpm"
+      # https://rpms.remirepo.net/enterprise/remi-release-8.rpm
+      name: "https://rpms.remirepo.net/enterprise/remi-release-8.rpm"
+      state: present
+      disable_gpg_check: yes # remi key not working and too lazy to fix 
+
+  - name: Ensure firewalld is disabled, for testing
+    service: name=firewalld state=stopped
+
+  - name: Install nodejs/NPM
+    yum: name=npm state=present enablerepo=epel
+
+  - name: install NPM forever
+    npm: name=forever global=yes state=present
+
+  - name: ensure app folder exist
+    file: "path={{ node_apps_location }} state=directory"
+
+  - name: Copy app folder/nodejs app to server
+    copy: "src=app dest={{ node_apps_location }}"
+
+  - name: Install app dependencies
+    npm: path={{ node_apps_location }}/app
